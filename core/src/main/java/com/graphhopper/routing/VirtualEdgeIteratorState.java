@@ -123,8 +123,19 @@ public class VirtualEdgeIteratorState implements EdgeIteratorState, CHEdgeIterat
     }
 
     @Override
+    public int getFlagsFirstInt() {
+        return edgeFlags.ints[0];
+    }
+
+    @Override
     public EdgeIteratorState setFlags(IntsRef flags) {
         this.edgeFlags = flags;
+        return this;
+    }
+
+    @Override
+    public EdgeIteratorState setFlagsFirstInt(int flags) {
+        this.edgeFlags.ints[0] = flags;
         return this;
     }
 

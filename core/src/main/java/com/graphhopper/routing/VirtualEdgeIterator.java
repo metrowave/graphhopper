@@ -106,8 +106,18 @@ class VirtualEdgeIterator implements EdgeIterator, CHEdgeIteratorState {
     }
 
     @Override
+    public int getFlagsFirstInt() {
+        return getFlags().ints[0];
+    }
+
+    @Override
     public EdgeIteratorState setFlags(IntsRef flags) {
         return edges.get(current).setFlags(flags);
+    }
+
+    @Override
+    public EdgeIteratorState setFlagsFirstInt(int flags) {
+        return edges.get(current).setFlagsFirstInt(flags);
     }
 
     @Override

@@ -108,6 +108,10 @@ abstract class EdgeAccess {
         }
     }
 
+    final void writeFlagsFirsInt_(long edgePointer, int flags) {
+        edges.setInt(edgePointer + E_FLAGS, flags);
+    }
+
     /**
      * Writes a new edge to the array of edges and adds it to the linked list of edges at nodeA and nodeB
      */

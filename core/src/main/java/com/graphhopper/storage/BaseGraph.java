@@ -1178,6 +1178,20 @@ class BaseGraph implements Graph {
         }
 
         @Override
+        public int getFlagsFirstInt() {
+            return getDirectFlags().ints[0];
+        }
+
+        @Override
+        public EdgeIteratorState setFlagsFirstInt(int flags) {
+            assert cachedIntsRef != null && cachedIntsRef.ints.length > 0 : "intsref size must be at least one";
+            edgeAccess.writeFlagsFirsInt_(edgePointer, flags);
+            freshFlags = true;
+            cachedIntsRef.ints[0] = flags;
+            return this;
+        }
+
+        @Override
         public final int getAdditionalField() {
             return baseGraph.edges.getInt(edgePointer + baseGraph.E_ADDITIONAL);
         }

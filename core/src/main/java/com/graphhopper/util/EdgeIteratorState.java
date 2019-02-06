@@ -128,6 +128,14 @@ public interface EdgeIteratorState {
     EdgeIteratorState setFlags(IntsRef edgeFlags);
 
     /**
+     * Stores the specified integer as flags at the beginning of the edge flags intsref. This method can be used both
+     * for convenience and for performance reasons avoiding the creation of an {@link IntsRef} object.
+     */
+    EdgeIteratorState setFlagsFirstInt(int flags);
+
+    int getFlagsFirstInt();
+
+    /**
      * @return the additional field value for this edge
      */
     int getAdditionalField();

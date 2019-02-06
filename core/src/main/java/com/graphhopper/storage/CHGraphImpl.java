@@ -316,15 +316,14 @@ public class CHGraphImpl implements CHGraph, Storable<CHGraph> {
         else
             weightInt = ((int) (weight * WEIGHT_FACTOR)) << 2;
 
-        IntsRef intsRef = edge.getDirectFlags();
-        int accessFlags = intsRef.ints[0] & scDirMask;
-        intsRef.ints[0] = weightInt | accessFlags;
-        edge.setFlags(intsRef);
+        int accessFlags = edge.getFlagsFirstInt() & scDirMask;
+        int flags = weightInt | accessFlags;
+        edge.setFlagsFirstInt(flags);
     }
 
     final double getWeight(CommonEdgeIterator edge) {
         // no need for reverseFlags call (shortcut has identical weight if both dies) and also no need for 64bit
-        long flags32bit = edge.getDirectFlags().ints[0];
+        long flags32bit = edge.getFlagsFirstInt();
         double weight = (flags32bit >>> 2) / WEIGHT_FACTOR;
         if (weight >= MAX_WEIGHT)
             return Double.POSITIVE_INFINITY;

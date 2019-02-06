@@ -228,7 +228,6 @@ class NodeBasedNodeContractor extends AbstractNodeContractor {
      * @return the actual number of shortcuts that were added to the graph
      */
     private int addShortcuts(Collection<Shortcut> shortcuts) {
-        IntsRef intsRef = new IntsRef(1);
         int tmpNewShortcuts = 0;
         NEXT_SC:
         for (Shortcut sc : shortcuts) {
@@ -261,8 +260,7 @@ class NodeBasedNodeContractor extends AbstractNodeContractor {
                     }
 
                     // note: flags overwrite weight => call first
-                    intsRef.ints[0] = sc.flags;
-                    iter.setFlags(intsRef);
+                    iter.setFlagsFirstInt(sc.flags);
                     iter.setWeight(sc.weight);
                     // TODO NOW (also below)
 //                    iter.set(shortcutAccessEnc, true).setReverse(shortcutAccessEnc, true);
@@ -278,8 +276,7 @@ class NodeBasedNodeContractor extends AbstractNodeContractor {
             if (!updatedInGraph) {
                 CHEdgeIteratorState edgeState = prepareGraph.shortcut(sc.from, sc.to);
                 // note: flags overwrite weight => call first
-                intsRef.ints[0] = sc.flags;
-                edgeState.setFlags(intsRef);
+                edgeState.setFlagsFirstInt(sc.flags);
                 edgeState.setWeight(sc.weight);
                 edgeState.setDistance(sc.dist);
                 edgeState.setSkippedEdges(sc.skippedEdge1, sc.skippedEdge2);

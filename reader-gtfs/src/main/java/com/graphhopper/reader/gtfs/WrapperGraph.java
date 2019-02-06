@@ -159,6 +159,16 @@ public class WrapperGraph implements Graph {
             }
 
             @Override
+            public int getFlagsFirstInt() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public EdgeIteratorState setFlagsFirstInt(int flags) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
             public int getAdditionalField() {
                 throw new UnsupportedOperationException();
             }

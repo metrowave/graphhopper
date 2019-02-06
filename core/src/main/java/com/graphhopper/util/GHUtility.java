@@ -551,6 +551,11 @@ public class GHUtility {
         }
 
         @Override
+        public EdgeIteratorState setFlagsFirstInt(int flags) {
+            throw new UnsupportedOperationException(("Not supported. Edge is empty"));
+        }
+
+        @Override
         public boolean next() {
             throw new UnsupportedOperationException("Not supported. Edge is empty.");
         }
@@ -578,6 +583,11 @@ public class GHUtility {
         @Override
         public IntsRef getFlags() {
             throw new UnsupportedOperationException("Not supported. Edge is empty.");
+        }
+
+        @Override
+        public int getFlagsFirstInt() {
+            throw new UnsupportedOperationException("Not supported. Edge is empty");
         }
 
         @Override

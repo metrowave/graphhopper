@@ -164,6 +164,17 @@ class GraphSupport {
                     }
 
                     @Override
+                    public int getFlagsFirstInt() {
+                        return getFlags().ints[0];
+                    }
+
+                    @Override
+                    public EdgeIteratorState setFlagsFirstInt(int flags) {
+                        edge.setFlagsFirstInt(flags);
+                        return this;
+                    }
+
+                    @Override
                     public int getAdditionalField() {
                         return edge.getAdditionalField();
                     }
