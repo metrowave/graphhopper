@@ -101,6 +101,10 @@ abstract class EdgeAccess {
         }
     }
 
+    final int readIntFlags(long edgePointer) {
+        return edges.getInt(edgePointer + E_FLAGS);
+    }
+
     final void writeFlags_(long edgePointer, IntsRef edgeFlags) {
         int size = edgeFlags.ints.length;
         for (int i = 0; i < size; i++) {
@@ -108,7 +112,7 @@ abstract class EdgeAccess {
         }
     }
 
-    final void writeFlagsFirsInt_(long edgePointer, int flags) {
+    final void writeIntFlags(long edgePointer, int flags) {
         edges.setInt(edgePointer + E_FLAGS, flags);
     }
 

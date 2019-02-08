@@ -55,7 +55,7 @@ class BaseGraph implements Graph {
     final BitUtil bitUtil;
     final EncodingManager encodingManager;
     final EdgeAccess edgeAccess;
-    private final int bytesForFlags;
+    final int bytesForFlags;
     // length | nodeA | nextNode | ... | nodeB
     // as we use integer index in 'egdes' area => 'geometry' area is limited to 4GB (we use pos&neg values!)
     private final DataAccess wayGeometry;
@@ -1009,11 +1009,6 @@ class BaseGraph implements Graph {
                 int nodeA = edgeAccess.getNodeA(edgePointer);
                 boolean baseNodeIsNodeA = baseNode == nodeA;
                 adjNode = baseNodeIsNodeA ? edgeAccess.getNodeB(edgePointer) : nodeA;
-
-                // TODO NOW, comment from master, do we still need this ?
-                // this does not properly work as reverse can be true from a previous edge state
-                // if (baseNode == adjNode && !reverse) reverse = true; else
-
                 reverse = !baseNodeIsNodeA;
                 freshFlags = false;
 
@@ -1120,14 +1115,14 @@ class BaseGraph implements Graph {
         boolean reverse = false;
         boolean freshFlags;
         int edgeId = -1;
-        final IntsRef baseIntsRef;
-        IntsRef cachedIntsRef;
+        final IntsRef cachedIntsRef;
+        int chFlags;
 
         public CommonEdgeIterator(long edgePointer, EdgeAccess edgeAccess, BaseGraph baseGraph) {
             this.edgePointer = edgePointer;
             this.edgeAccess = edgeAccess;
             this.baseGraph = baseGraph;
-            this.cachedIntsRef = this.baseIntsRef = new IntsRef(baseGraph.bytesForFlags / 4);
+            cachedIntsRef = new IntsRef(baseGraph.bytesForFlags / 4);
         }
 
         @Override
@@ -1151,9 +1146,23 @@ class BaseGraph implements Graph {
             return this;
         }
 
+        public int getCHFlags() {
+            if (!freshFlags) {
+                chFlags = edgeAccess.readIntFlags(edgePointer);
+                freshFlags = true;
+            }
+            return chFlags;
+        }
+
+        public EdgeIteratorState setCHFlags(int flags) {
+            edgeAccess.writeIntFlags(edgePointer, flags);
+            chFlags = flags;
+            freshFlags = true;
+            return this;
+        }
+
         final IntsRef getDirectFlags() {
             if (!freshFlags) {
-                // TODO NOW make it possible to use arraycopy via new method in DataAccess
                 edgeAccess.readFlags_(edgePointer, cachedIntsRef);
                 freshFlags = true;
             }
@@ -1169,25 +1178,10 @@ class BaseGraph implements Graph {
         public final EdgeIteratorState setFlags(IntsRef edgeFlags) {
             assert cachedIntsRef == null || edgeFlags.ints.length == cachedIntsRef.ints.length : "incompatible flags " + edgeFlags.ints.length + " vs " + cachedIntsRef.ints.length;
             edgeAccess.writeFlags_(edgePointer, edgeFlags);
-            // Or is arraycopy faster? System.arraycopy(edgeFlags.ints, 0, cachedIntsRef.ints, 0, edgeFlags.ints.length);
             for (int i = 0; i < edgeFlags.ints.length; i++) {
                 cachedIntsRef.ints[i] = edgeFlags.ints[i];
             }
             freshFlags = true;
-            return this;
-        }
-
-        @Override
-        public int getFlagsFirstInt() {
-            return getDirectFlags().ints[0];
-        }
-
-        @Override
-        public EdgeIteratorState setFlagsFirstInt(int flags) {
-            assert cachedIntsRef != null && cachedIntsRef.ints.length > 0 : "intsref size must be at least one";
-            edgeAccess.writeFlagsFirsInt_(edgePointer, flags);
-            freshFlags = true;
-            cachedIntsRef.ints[0] = flags;
             return this;
         }
 

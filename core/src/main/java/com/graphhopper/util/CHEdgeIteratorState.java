@@ -19,6 +19,7 @@ package com.graphhopper.util;
 
 import com.graphhopper.routing.ch.PrepareEncoder;
 import com.graphhopper.storage.CHGraph;
+import com.graphhopper.storage.IntsRef;
 
 /**
  * The state returned from the EdgeIterator of a CHGraph
@@ -29,6 +30,7 @@ import com.graphhopper.storage.CHGraph;
  * @see CHEdgeIterator
  */
 public interface CHEdgeIteratorState extends EdgeIteratorState {
+
     int getSkippedEdge1();
 
     int getSkippedEdge2();
@@ -46,6 +48,14 @@ public interface CHEdgeIteratorState extends EdgeIteratorState {
      * x --> u --> v --> w --> y
      */
     CHEdgeIteratorState setFirstAndLastOrigEdges(int firstOrigEdge, int lastOrigEdge);
+
+    /**
+     * Stores the specified integer as flags at the beginning of the edge flags intsref. This method can be used both
+     * for convenience and for performance reasons avoiding the creation of an {@link IntsRef} object.
+     */
+    EdgeIteratorState setCHFlags(int flags);
+
+    int getCHFlags();
 
     /**
      * @return true if this edge is a shortcut, false otherwise.

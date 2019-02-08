@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.graphhopper.routing.ch.NodeBasedNodeContractorTest.SC_ACCESS;
 import static org.junit.Assert.*;
 
 /**
@@ -141,25 +140,16 @@ public class GraphHopperStorageCHTest extends GraphHopperStorageTest {
         EdgeExplorer baseCarOutExplorer = graph.createEdgeExplorer(carOutFilter);
 
         // only remove edges
-
-        IntsRef flags = encodingManager.createEdgeFlags();
-        SC_ACCESS.setBool(false, flags, true);
-        SC_ACCESS.setBool(true, flags, true);
-
-        IntsRef flags2 = encodingManager.createEdgeFlags();
-        SC_ACCESS.setBool(false, flags2, true);
-        SC_ACCESS.setBool(true, flags2, false);
-
         lg.edge(4, 1, 30, true);
         graph.freeze();
         CHEdgeIteratorState tmp = lg.shortcut(1, 2);
-        tmp.setDistance(10).setFlags(flags);
+        tmp.setCHFlags(PrepareEncoder.getScDirMask()).setDistance(10);
         tmp.setSkippedEdges(10, 11);
         tmp = lg.shortcut(1, 0);
-        tmp.setDistance(20).setFlags(flags2);
+        tmp.setCHFlags(PrepareEncoder.getScFwdDir()).setDistance(20);
         tmp.setSkippedEdges(12, 13);
         tmp = lg.shortcut(3, 1);
-        tmp.setDistance(30).setFlags(flags2);
+        tmp.setCHFlags(PrepareEncoder.getScFwdDir()).setDistance(30);
         tmp.setSkippedEdges(14, 15);
         // create everytime a new independent iterator for disconnect method
         EdgeIterator iter = lg.createEdgeExplorer().setBaseNode(1);
@@ -198,9 +188,6 @@ public class GraphHopperStorageCHTest extends GraphHopperStorageTest {
         graph.freeze();
 
         // only remove edges
-        IntsRef flags = encodingManager.createEdgeFlags();
-        SC_ACCESS.setBool(false, flags, true);
-        SC_ACCESS.setBool(true, flags, true);
         CHEdgeIteratorState sc1 = g.shortcut(0, 1);
         assertTrue(sc1.isShortcut());
         sc1.setWeight(2.001);
@@ -210,23 +197,20 @@ public class GraphHopperStorageCHTest extends GraphHopperStorageTest {
         sc1.setWeight(Double.MAX_VALUE);
         assertTrue(Double.isInfinite(sc1.getWeight()));
 
-        sc1.setFlags(flags);
+        sc1.setCHFlags(PrepareEncoder.getScDirMask());
         sc1.setWeight(100.123);
         assertEquals(100.123, sc1.getWeight(), 1e-3);
-        assertTrue(sc1.get(SC_ACCESS));
-        assertTrue(sc1.getReverse(SC_ACCESS));
+        assertTrue(PrepareEncoder.isFwd(sc1.getCHFlags()));
+        assertTrue(PrepareEncoder.isBwd(sc1.getCHFlags()));
 
-        flags = encodingManager.createEdgeFlags();
-        SC_ACCESS.setBool(false, flags, false);
-        SC_ACCESS.setBool(true, flags, true);
-        sc1.setFlags(flags);
+        sc1.setCHFlags(PrepareEncoder.getScBwdDir());
         sc1.setWeight(100.123);
         assertEquals(100.123, sc1.getWeight(), 1e-3);
-        assertFalse(sc1.get(SC_ACCESS));
-        assertTrue(sc1.getReverse(SC_ACCESS));
+        assertFalse(PrepareEncoder.isFwd(sc1.getCHFlags()));
+        assertTrue(PrepareEncoder.isBwd(sc1.getCHFlags()));
 
         // check min weight
-        sc1.setFlags(flags);
+        sc1.setCHFlags(PrepareEncoder.getScDirMask());
         sc1.setWeight(1e-5);
         assertEquals(1e-3, sc1.getWeight(), 1e-10);
     }

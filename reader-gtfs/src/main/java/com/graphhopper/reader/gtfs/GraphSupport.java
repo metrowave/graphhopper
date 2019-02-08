@@ -22,6 +22,7 @@ import com.graphhopper.routing.profiles.*;
 import com.graphhopper.routing.util.AllEdgesIterator;
 import com.graphhopper.routing.util.EdgeFilter;
 import com.graphhopper.storage.*;
+import com.graphhopper.util.CHEdgeIteratorState;
 import com.graphhopper.util.EdgeExplorer;
 import com.graphhopper.util.EdgeIteratorState;
 import com.graphhopper.util.PointList;
@@ -160,17 +161,6 @@ class GraphSupport {
                     @Override
                     public EdgeIteratorState setFlags(IntsRef flags) {
                         edge.setFlags(flags);
-                        return this;
-                    }
-
-                    @Override
-                    public int getFlagsFirstInt() {
-                        return getFlags().ints[0];
-                    }
-
-                    @Override
-                    public EdgeIteratorState setFlagsFirstInt(int flags) {
-                        edge.setFlagsFirstInt(flags);
                         return this;
                     }
 

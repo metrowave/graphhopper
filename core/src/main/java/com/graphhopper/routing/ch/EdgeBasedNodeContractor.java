@@ -298,7 +298,7 @@ class EdgeBasedNodeContractor extends AbstractNodeContractor {
         CHEdgeIteratorState shortcut = prepareGraph.shortcut(from, adjNode);
         int direction = PrepareEncoder.getScFwdDir();
         // we need to set flags first because they overwrite weight etc
-        shortcut.setFlagsFirstInt(direction);
+        shortcut.setCHFlags(direction);
         shortcut.setSkippedEdges(edgeFrom.edge, edgeTo.edge)
                 // this is a bit of a hack, we misuse incEdge of edgeFrom's parent to store the first orig edge
                 .setFirstAndLastOrigEdges(edgeFrom.getParent().incEdge, edgeTo.incEdge)

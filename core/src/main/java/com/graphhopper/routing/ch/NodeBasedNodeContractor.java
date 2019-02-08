@@ -260,7 +260,7 @@ class NodeBasedNodeContractor extends AbstractNodeContractor {
                     }
 
                     // note: flags overwrite weight => call first
-                    iter.setFlagsFirstInt(sc.flags);
+                    iter.setCHFlags(sc.flags);
                     iter.setWeight(sc.weight);
                     // TODO NOW (also below)
 //                    iter.set(shortcutAccessEnc, true).setReverse(shortcutAccessEnc, true);
@@ -276,7 +276,7 @@ class NodeBasedNodeContractor extends AbstractNodeContractor {
             if (!updatedInGraph) {
                 CHEdgeIteratorState edgeState = prepareGraph.shortcut(sc.from, sc.to);
                 // note: flags overwrite weight => call first
-                edgeState.setFlagsFirstInt(sc.flags);
+                edgeState.setCHFlags(sc.flags);
                 edgeState.setWeight(sc.weight);
                 edgeState.setDistance(sc.dist);
                 edgeState.setSkippedEdges(sc.skippedEdge1, sc.skippedEdge2);

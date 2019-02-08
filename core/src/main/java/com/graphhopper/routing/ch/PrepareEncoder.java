@@ -50,6 +50,14 @@ public class PrepareEncoder {
         return scBwdDir;
     }
 
+    public static boolean isFwd(int chFlags) {
+        return (scFwdDir & chFlags) != 0;
+    }
+
+    public static boolean isBwd(int chFlags) {
+        return (scBwdDir & chFlags) != 0;
+    }
+
     /**
      * Returns 1 if existingScFlags of an existing shortcut can be overwritten with a new shortcut by
      * newScFlags without limiting or changing the directions of the existing shortcut.
