@@ -294,10 +294,6 @@ public class CHGraphImpl implements CHGraph, Storable<CHGraph> {
         return chEdgeAccess.getShortcutWeight(edgePointer);
     }
 
-    final void setFlagsAndWeight(long edgePointer, int flags, double weight) {
-        chEdgeAccess.setAccessAndWeight(edgePointer, flags, weight);
-    }
-
     void loadNodesHeader() {
         isReadyForContraction = nodesCH.getHeader(0 * 4) == 1;
     }
@@ -479,8 +475,17 @@ public class CHGraphImpl implements CHGraph, Storable<CHGraph> {
     }
 
     class CHEdgeIteratorImpl extends EdgeIterable implements CHEdgeExplorer, CHEdgeIterator {
+        private int cachedFlags;
+        private boolean flagsDirty = true;
+
         public CHEdgeIteratorImpl(BaseGraph baseGraph, EdgeAccess edgeAccess, EdgeFilter filter) {
             super(baseGraph, edgeAccess, filter);
+        }
+
+        @Override
+        public boolean next() {
+            dirtyFlags();
+            return super.next();
         }
 
         @Override
@@ -558,17 +563,18 @@ public class CHGraphImpl implements CHGraph, Storable<CHGraph> {
         @Override
         public boolean get(BooleanEncodedValue property) {
             // TODO assert equality of "access boolean encoded value" that is specifically created for CHGraph to make it possible we can use other BooleanEncodedValue objects for CH too!
-            if (isShortcut())
-                return (chEdgeAccess.getShortcutFlags(edgePointer) & (reverse ? PrepareEncoder.getScBwdDir() : PrepareEncoder.getScFwdDir())) != 0;
+            if (isShortcut()) {
+                return (getShortcutFlags_() & (reverse ? PrepareEncoder.getScBwdDir() : PrepareEncoder.getScFwdDir())) != 0;
+            }
 
             return property.getBool(reverse, getDirectFlags());
         }
 
         @Override
         public boolean getReverse(BooleanEncodedValue property) {
-            if (isShortcut())
-                return (chEdgeAccess.getShortcutFlags(edgePointer) & (reverse ? PrepareEncoder.getScFwdDir() : PrepareEncoder.getScBwdDir())) != 0;
-
+            if (isShortcut()) {
+                return (getShortcutFlags_() & (reverse ? PrepareEncoder.getScFwdDir() : PrepareEncoder.getScBwdDir())) != 0;
+            }
             return property.getBool(!reverse, getDirectFlags());
         }
 
@@ -576,19 +582,21 @@ public class CHGraphImpl implements CHGraph, Storable<CHGraph> {
         public final CHEdgeIteratorState setWeight(double weight) {
             checkShortcut(true, "setWeight");
             CHGraphImpl.this.setWeight(edgePointer, weight);
+            dirtyFlags();
             return this;
         }
 
         @Override
         public void setFlagsAndWeight(int flags, double weight) {
             checkShortcut(true, "setFlagsAndWeight");
-            CHGraphImpl.this.setFlagsAndWeight(edgePointer, flags, weight);
+            chEdgeAccess.setAccessAndWeight(edgePointer, flags, weight);
+            dirtyFlags();
         }
 
         @Override
         public final double getWeight() {
             checkShortcut(true, "getWeight");
-            return CHGraphImpl.this.getWeight(edgePointer);
+            return chEdgeAccess.getShortcutWeightUsingFlags(getShortcutFlags_());
         }
 
         @Override
@@ -644,7 +652,23 @@ public class CHGraphImpl implements CHGraph, Storable<CHGraph> {
 
         @Override
         public int getMergeStatus(long flags) {
-            return PrepareEncoder.getScMergeStatus(chEdgeAccess.getShortcutFlags(edgePointer), flags);
+            refreshFlagsIfNeeded();
+            return PrepareEncoder.getScMergeStatus(getShortcutFlags_(), flags);
+        }
+
+        private void dirtyFlags() {
+            flagsDirty = true;
+        }
+
+        private int getShortcutFlags_() {
+            refreshFlagsIfNeeded();
+            return cachedFlags;
+        }
+
+        private void refreshFlagsIfNeeded() {
+            if (flagsDirty) {
+                cachedFlags = chEdgeAccess.getShortcutFlags(edgePointer);
+            }
         }
     }
 
@@ -764,7 +788,7 @@ public class CHGraphImpl implements CHGraph, Storable<CHGraph> {
 
         @Override
         public void setFlagsAndWeight(int flags, double weight) {
-            CHGraphImpl.this.setFlagsAndWeight(edgePointer, flags, weight);
+            chEdgeAccess.setAccessAndWeight(edgePointer, flags, weight);
         }
 
         @Override
@@ -865,6 +889,10 @@ public class CHGraphImpl implements CHGraph, Storable<CHGraph> {
         double getShortcutWeight(long edgePointer) {
             // no need for reverseFlags call (shortcut has identical weight if both dies) and also no need for 64bit
             long flags32bit = getShortcutFlags(edgePointer);
+            return getShortcutWeightUsingFlags(flags32bit);
+        }
+
+        private double getShortcutWeightUsingFlags(long flags32bit) {
             double weight = (flags32bit >>> 2) / WEIGHT_FACTOR;
             if (weight >= MAX_WEIGHT)
                 return Double.POSITIVE_INFINITY;

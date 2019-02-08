@@ -998,7 +998,7 @@ class BaseGraph implements Graph {
         }
 
         @Override
-        public final boolean next() {
+        public boolean next() {
             while (true) {
                 if (nextEdgeId == EdgeIterator.NO_EDGE)
                     return false;
